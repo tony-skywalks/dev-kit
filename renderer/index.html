@@ -10,62 +10,33 @@
   <link rel="stylesheet" href="css/sweetalert2.min.css">
   <title>File Search</title>
   <style>
-    body {
-    background-color: #fbfbfb;
-    }
+    body {background-color: #fff;}
     @media (min-width: 991.98px) {
-    main {
-    padding-left: 240px;
+      main {padding-left: 240px;}
     }
-    }
-
-    /* Sidebar */
-    .sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    padding: 58px 0 0; /* Height of navbar */
-    box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);
-    width: 240px;
-    z-index: 600;
-    }
-
+    .sidebar {position: fixed;top: 0;bottom: 0;left: 0;padding: 58px 0 0;box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);width: 240px;z-index: 600;}
     @media (max-width: 991.98px) {
-    .sidebar {
-    width: 100%;
+      .sidebar {width: 100%;}
     }
-    }
-    .sidebar .active {
-    border-radius: 5px;
-    box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%);
-    }
-
-    .sidebar-sticky {
-    position: relative;
-    top: 0;
-    height: calc(100vh - 48px);
-    padding-top: 0.5rem;
-    overflow-x: hidden;
-    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    }
+    .sidebar .active {border-radius: 5px;box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%);}
+    .sidebar-sticky {position: relative;top: 0;height: calc(100vh - 48px);padding-top: 0.5rem;overflow-x: hidden;overflow-y: auto;}
   </style>
 </head>
 <body>
   <!--Main Navigation-->
   <header>
     <!-- Sidebar -->
-    <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
+    <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-dark">
       <div class="position-sticky">
         <div class="list-group list-group-flush mx-3 mt-4">
-          <a href="#" class="list-group-item list-group-item-action py-2 ripple active">
-            <i class="fas fa-chart-area fa-fw me-3"></i><span>File Finder</span>
+          <a href="#" class="bg-primary text-white list-group-item list-group-item-action py-2 ripple active">
+            <i class="fa-regular fa-folder-open"></i><span> File Finder</span>
           </a>
         </div>
       </div>
     </nav>
 
-    <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+    <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-grey fixed-top shadow-0 bg-primary">
       <div class="container-fluid">
         <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#sidebarMenu"
           aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,8 +44,7 @@
         </button>
 
         <a class="navbar-brand" href="#">
-          <img src="https://mdbcdn.b-cdn.net/img/logo/mdb-transaprent-noshadows.webp" height="25" alt="MDB Logo"
-            loading="lazy" />
+          <strong class="text-info"><span class="text-white">Sky</span> Cleaner</strong>
         </a>
 
           </li>
@@ -86,9 +56,21 @@
   <!--Main layout-->
   <main style="margin-top: 58px;">
     <div class="container pt-4">
-      <h6>Select Location</h6>
-      <button class="btn btn-primary mt-2" id="search-btn">Search</button>
-      <div id="append-here"></div>
+
+      <div class="input-group mb-3">
+        <input
+          type="text"
+          class="form-control"
+          id="search-input"
+          placeholder="Select Location"
+          aria-label="Select Location"
+          aria-describedby="button-addon2"
+        />
+        <button class="btn btn-primary" id="search-btn" type="button" id="button-addon2" data-mdb-ripple-color="dark">
+          Select
+        </button>
+      </div>
+      <div id="append-here" class="table-responsive"></div>
     </div>
   </main>
   <script src="js/jquery.min.js"></script>

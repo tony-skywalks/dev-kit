@@ -18,8 +18,8 @@ createMainWindow = () => {
       preload:path.join(__dirname,'preload.js')
     },
     title:'File Search',
-    width: isDev ? 1600 : 800,
-    height:600,
+    width: isDev ? 1600 : 1000,
+    height:800,
   })
   
   if (isDev) {
@@ -54,8 +54,13 @@ ipcMain.on('delete:file',(e,options) => {
 })
 
 ipcMain.on('select:location',(e,options) => {
-  dialog.showOpenDialog({ properties: ['openDirectory'] }).then((res)=> {
+  let properties = { properties: ['openDirectory'] }
+  if (options['dir'] !== '') {
+    properties.defaultPath = options['dir'] 
+  }
+  dialog.showOpenDialog(properties).then((res)=> {
     if (res.canceled === false) {
+      mainWindow.webContents.send('set:searchbar',{path:res.filePaths[0]})
       getFilesWithSize(res.filePaths[0]).then((filesMap) => {
         mainWindow.webContents.send('get:results',{res:filesMap})
       }).catch((e)=>{
