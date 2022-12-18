@@ -17,13 +17,13 @@ ipcRenderer.on('get:results',(data,e) => {
 ipcRenderer.on('set:searchbar',(data,e) => {
     $('#search-input').val(data.path)
 })
-function createTable(data) {
+createTable = (data) => {
     let html = '';
     if (data.res.length > 0) {
         html +='<table class="mt-5 table"><thead class="table-dark"><tr><th>#</th><th>Filename</th><th>Size</th><th>Actions</th></tr></thead><tbody>'
         let i = 1
         data.res.forEach(element => {
-            html += `<tr><td>${i}</td><td>${element.name}</td><td>${element.size}</td><td><button attr-file="${element.name}" class="del-btn btn btn-sm btn-danger"><i class="fa fa-trash"></i></button></td></tr>`
+            html += `<tr><td>${i}</td><td>${getIco(element.name)} ${element.name.replace($('#search-input').val()+'/','')}</td><td>${element.size}</td><td><button attr-file="${element.name}" class="del-btn btn btn-sm btn-danger"><i class="fa fa-trash"></i></button></td></tr>`
             i++
         });
     
@@ -34,7 +34,7 @@ function createTable(data) {
     appendHere.innerHTML = html
 }
 
-function deleteFile(file) {
+deleteFile = (file) => {
     Swal.fire({
         icon:'warning',
         title: 'Do you want to continue?',
@@ -58,3 +58,5 @@ $('#append-here').on('click','.del-btn',(e) => {
         $(e.target).parents('tr').remove()
     }
 })
+
+getIco = (file) => '<i class="fa-solid fa-file fs-6 text-primary"></i> '
