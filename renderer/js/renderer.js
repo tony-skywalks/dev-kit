@@ -3,23 +3,34 @@ const appendHere = document.querySelector('#append-here')
 
 
 search.addEventListener('click',(e) => {
-    ipcRenderer.send('select:location')
+    let dir = ''
+    if ($('#search-input').val() !== ''){
+        dir = $('#search-input').val()
+    }
+    ipcRenderer.send('select:location',{dir:dir})
 })
 
 ipcRenderer.on('get:results',(data,e) => {
     createTable(data)
 })
 
+ipcRenderer.on('set:searchbar',(data,e) => {
+    $('#search-input').val(data.path)
+})
 function createTable(data) {
-    console.log(data);
-    html ='<table class="mt-5 table"><thead class="table-dark"><tr><th>#</th><th>Filename</th><th>Size</th><th>Actions</th></tr></thead><tbody>'
-    let i = 1
-    data.res.forEach(element => {
-        html += `<tr><td>${i}</td><td>${element.name}</td><td>${element.size}</td><td><button attr-file="${element.name}" class="del-btn btn btn-sm btn-danger"><i class="fa fa-trash"></i></button></td></tr>`
-        i++
-    });
-
-    html += '</tbody></table>'
+    let html = '';
+    if (data.res.length > 0) {
+        html +='<table class="mt-5 table"><thead class="table-dark"><tr><th>#</th><th>Filename</th><th>Size</th><th>Actions</th></tr></thead><tbody>'
+        let i = 1
+        data.res.forEach(element => {
+            html += `<tr><td>${i}</td><td>${element.name}</td><td>${element.size}</td><td><button attr-file="${element.name}" class="del-btn btn btn-sm btn-danger"><i class="fa fa-trash"></i></button></td></tr>`
+            i++
+        });
+    
+        html += '</tbody></table>'
+    } else {
+        html += '<img src="../assets/img/empty.png" class="img-fluid w-100">'
+    }
     appendHere.innerHTML = html
 }
 
