@@ -61,8 +61,9 @@ ipcMain.on('select:location',(e,options) => {
   dialog.showOpenDialog(properties).then((res)=> {
     if (res.canceled === false) {
       mainWindow.webContents.send('set:searchbar',{path:res.filePaths[0]})
-      getFilesWithSize(res.filePaths[0]).then((filesMap) => {
+      getFilesWithSize(res.filePaths[0],options.options).then((filesMap) => {
         mainWindow.webContents.send('get:results',{res:filesMap})
+        console.log("here");
       }).catch((e)=>{
         console.log("Some Error Occured",e);
       })
@@ -82,14 +83,36 @@ async function* getFiles(dir) {
   }
 };
 
-async function getFilesWithSize(dir) {
+async function getFilesWithSize(dir,options) {
+  let sizeArry = {
+    '0':0,
+    '1':1000000,
+    '2':5000000,
+    '3':10000000,
+    '4':10000000,
+    '5':50000000,
+    '6':100000000,
+    '7':500000000,
+    '7':1000000000,
+  }
+  let size = sizeArry[options.filter]
   var results = [];
   var i = 0;
+  console.log(size)
   for await (const f of getFiles(dir)) {
-    s = formatBytes(fs.statSync(f).size)
-    results[i] = {name:f,size:s}
-    i++;
+    if (options.filter == '0') {
+      s = formatBytes(fs.statSync(f).size)
+      results[i] = {name:f,size:s}
+      i++;
+    } else {
+      s = fs.statSync(f).size
+      if (((s <= size) && (options.filter < 4)) || ((s >= size) && (options.filter >= 4)) ) {
+        results[i] = {name:f,size:formatBytes(s)}
+        i++;
+      }
+    }
   }
+  console.log(results);
   return results
 }
 
