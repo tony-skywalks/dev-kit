@@ -22,6 +22,8 @@
     .table>:not(caption)>*>* {padding: .5rem;font-size: 0.9rem;}
     td {padding: 0.2rem !important;}
     .del-btn{padding: 5px 10px;}
+    .text-left{text-align: left;}
+    .accordion-borderless .accordion-item .accordion-button {background-color: var(--mdb-accordion-borderless-btn-bg);color: var(--mdb-accordion-borderless-btn-color);box-shadow: none;}
     .sidebar .active {border-radius: 5px;box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%);}
     .sidebar-sticky {position: relative;top: 0;height: calc(100vh - 48px);padding-top: 0.5rem;overflow-x: hidden;overflow-y: auto;}
   </style>
@@ -73,6 +75,57 @@
         <button class="btn btn-primary" id="search-btn" type="button" id="button-addon2" data-mdb-ripple-color="dark">
           Select
         </button>
+      </div>
+      <div class="accordion accordion-borderless" id="accordionFlushExampleX">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="flush-headingOneX">
+            <button class="accordion-button" type="button" data-mdb-toggle="collapse"
+              data-mdb-target="#flush-collapseOneX" aria-expanded="true" aria-controls="flush-collapseOneX">
+              Filters
+            </button>
+          </h2>
+          <div id="flush-collapseOneX" class="accordion-collapse collapse show"
+            aria-labelledby="flush-headingOneX" data-mdb-parent="#accordionFlushExampleX">
+            <div class="accordion-body">
+              <div class="container">
+                <div class="row">
+                  <div class="col-md-4">
+                    <select id="select-filter" class="text-left form-select btn btn-outline-info" aria-label="Default select example">
+                      <option value="0" selected>-- Filter size --</option>
+                      <option value="1">Less Than 1Mb</option>
+                      <option value="2">Less Than 5Mb</option>
+                      <option value="3">Less Than 10Mb</option>
+                      <option value="4">Greater Than 10Mb</option>
+                      <option value="5">Greater Than 50Mb</option>
+                      <option value="6">Greater Than 100Mb</option>
+                      <option value="7">Greater Than 500Mb</option>
+                      <option value="8">Greater Than 1Gb</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <select id="select-sort" class="text-left form-select btn btn-outline-primary" aria-label="Default select example">
+                      <option value="0" selected>-- Sort Results --</option>
+                      <option value="1">Size Asc</option>
+                      <option value="2">Size Desc</option>
+                      <option value="3">Name Asc</option>
+                      <option value="4">Name Desc</option>
+                      <!-- <option value="5">Created Asc</option>
+                      <option value="6">Created Desc</option> -->
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <select id="select-type" class="text-left form-select btn btn-outline-dark" aria-label="Default select example">
+                      <option value="0" selected>-- Filter Types --</option>
+                      <option value="1">All</option>
+                      <option value="2">Media</option>
+                      <option value="3">Three</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div id="append-here" class="table-responsive"></div>
     </div>

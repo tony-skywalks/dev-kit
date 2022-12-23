@@ -61,8 +61,9 @@ ipcMain.on('select:location',(e,options) => {
   dialog.showOpenDialog(properties).then((res)=> {
     if (res.canceled === false) {
       mainWindow.webContents.send('set:searchbar',{path:res.filePaths[0]})
-      getFilesWithSize(res.filePaths[0]).then((filesMap) => {
+      getFilesWithSize(res.filePaths[0],options.options).then((filesMap) => {
         mainWindow.webContents.send('get:results',{res:filesMap})
+        console.log("here");
       }).catch((e)=>{
         console.log("Some Error Occured",e);
       })
@@ -82,22 +83,82 @@ async function* getFiles(dir) {
   }
 };
 
-async function getFilesWithSize(dir) {
+async function getFilesWithSize(dir,options) {
+  let sizeArry = {
+    '0':0,
+    '1':1000000,
+    '2':5000000,
+    '3':10000000,
+    '4':10000000,
+    '5':50000000,
+    '6':100000000,
+    '7':500000000,
+    '7':1000000000,
+  }
+  let size = sizeArry[options.filter]
   var results = [];
   var i = 0;
+  console.log(size)
   for await (const f of getFiles(dir)) {
-    s = formatBytes(fs.statSync(f).size)
-    results[i] = {name:f,size:s}
-    i++;
+    if (options.filter == '0') {
+      s = fs.statSync(f).size
+      results[i] = {name:f,size:s}
+      i++;
+    } else {
+      s = fs.statSync(f).size
+      if (((s <= size) && (options.filter < 4)) || ((s >= size) && (options.filter >= 4)) ) {
+        results[i] = {name:f,size:s}
+        i++;
+      }
+    }
+  }
+  if (options.sort == 1) {
+    results = sortArrayWithSize(results)
+  } else if (options.sort == 2) {
+    results = sortArrayWithSize(results).reverse()
+  } else if (options.sort == 3) {
+    results = sortArrayWithName(results)
+  } else if (options.sort == 4) {
+    results = sortArrayWithName(results).reverse()
   }
   return results
 }
 
-function formatBytes(bytes, decimals = 2) {
-  if (!+bytes) return '0 Bytes'
-  const k = 1024
-  const dm = decimals < 0 ? 0 : decimals
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+function sortArrayWithSize(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    let lowest = i
+    console.log(arr[i]);
+    for (let j = i +1; j < arr.length; j++) {
+        if (arr[lowest].size > arr[j].size) {
+            lowest = j
+        }        
+    }
+
+    if (lowest !== i) {
+        let temp = arr[i]
+        arr[i] = arr[lowest]
+        arr[lowest] = temp
+    }
+  }
+  return arr
+}
+
+
+function sortArrayWithName(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    let lowest = i
+    
+    for (let j = i +1; j < arr.length; j++) {
+        if (arr[lowest].name.localeCompare(arr[j].name) == 1) {
+            lowest = j
+        }        
+    }
+
+    if (lowest !== i) {
+        let temp = arr[i]
+        arr[i] = arr[lowest]
+        arr[lowest] = temp
+    }
+  }
+  return arr
 }
