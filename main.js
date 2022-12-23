@@ -101,14 +101,32 @@ async function getFilesWithSize(dir,options) {
   console.log(size)
   for await (const f of getFiles(dir)) {
     if (options.filter == '0') {
-      s = fs.statSync(f).size
-      results[i] = {name:f,size:s}
-      i++;
-    } else {
-      s = fs.statSync(f).size
-      if (((s <= size) && (options.filter < 4)) || ((s >= size) && (options.filter >= 4)) ) {
+      if (options.type == '0') {
+        s = fs.statSync(f).size
         results[i] = {name:f,size:s}
         i++;
+      } else {
+        if (checkFileTypeSucceds(options.type,f) == true) {
+          s = fs.statSync(f).size
+          results[i] = {name:f,size:s}
+          i++;
+        }
+      }
+    } else {
+      if (options.type == '0') {
+        s = fs.statSync(f).size
+        if (((s <= size) && (options.filter < 4)) || ((s >= size) && (options.filter >= 4)) ) {
+          results[i] = {name:f,size:s}
+          i++;
+        }
+      } else {
+        if (checkFileTypeSucceds(options.type,f) == true) { 
+          s = fs.statSync(f).size
+          if (((s <= size) && (options.filter < 4)) || ((s >= size) && (options.filter >= 4)) ) {
+            results[i] = {name:f,size:s}
+            i++;
+          }
+        }
       }
     }
   }
@@ -141,6 +159,24 @@ function sortArrayWithSize(arr) {
     }
   }
   return arr
+}
+
+function checkFileTypeSucceds(ftype,file) {
+  images = ['.jpeg','.jpg','.png','.gif','.tiff','.webp','.svg','.ico'] 
+  videos = ['.mp4','.mov','.avi','.mkv','.3gp'] 
+  extension = path.extname(file)
+  if (ftype == '1') {
+    if (images.includes(extension)) {
+      return true
+    }
+  } else if (ftype == '2') {
+    if (videos.includes(extension)) {
+      return true
+    }
+  } else {
+    return true
+  }
+  return false
 }
 
 
