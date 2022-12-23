@@ -33,7 +33,7 @@ createTable = (data) => {
         html +='<table class="mt-5 table"><thead class="table-dark"><tr><th>#</th><th>Filename</th><th>File Size</th><th>Actions</th></tr></thead><tbody>'
         let i = 1
         data.res.forEach(element => {
-            html += `<tr><td>${i}</td><td>${getIco(element.name)} ${element.name.replace($('#search-input').val()+'/','')}</td><td>${element.size}</td><td><button attr-file="${element.name}" class="del-btn btn btn-sm btn-danger"><i class="fa fa-trash"></i></button></td></tr>`
+            html += `<tr><td>${i}</td><td>${getIco(element.name)} ${element.name.replace($('#search-input').val()+'/','')}</td><td>${formatBytes(element.size)}</td><td><button attr-file="${element.name}" class="del-btn btn btn-sm btn-danger"><i class="fa fa-trash"></i></button></td></tr>`
             i++
         });
     
@@ -70,3 +70,12 @@ $('#append-here').on('click','.del-btn',(e) => {
 })
 
 getIco = (file) => '<i class="fa-solid fa-file fs-6 text-primary"></i> '
+
+function formatBytes(bytes, decimals = 2) {
+    if (!+bytes) return '0 Bytes'
+    const k = 1024
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+  }

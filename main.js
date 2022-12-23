@@ -101,26 +101,64 @@ async function getFilesWithSize(dir,options) {
   console.log(size)
   for await (const f of getFiles(dir)) {
     if (options.filter == '0') {
-      s = formatBytes(fs.statSync(f).size)
+      s = fs.statSync(f).size
       results[i] = {name:f,size:s}
       i++;
     } else {
       s = fs.statSync(f).size
       if (((s <= size) && (options.filter < 4)) || ((s >= size) && (options.filter >= 4)) ) {
-        results[i] = {name:f,size:formatBytes(s)}
+        results[i] = {name:f,size:s}
         i++;
       }
     }
   }
-  console.log(results);
+  if (options.sort == 1) {
+    results = sortArrayWithSize(results)
+  } else if (options.sort == 2) {
+    results = sortArrayWithSize(results).reverse()
+  } else if (options.sort == 3) {
+    results = sortArrayWithName(results)
+  } else if (options.sort == 4) {
+    results = sortArrayWithName(results).reverse()
+  }
   return results
 }
 
-function formatBytes(bytes, decimals = 2) {
-  if (!+bytes) return '0 Bytes'
-  const k = 1024
-  const dm = decimals < 0 ? 0 : decimals
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+function sortArrayWithSize(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    let lowest = i
+    console.log(arr[i]);
+    for (let j = i +1; j < arr.length; j++) {
+        if (arr[lowest].size > arr[j].size) {
+            lowest = j
+        }        
+    }
+
+    if (lowest !== i) {
+        let temp = arr[i]
+        arr[i] = arr[lowest]
+        arr[lowest] = temp
+    }
+  }
+  return arr
+}
+
+
+function sortArrayWithName(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    let lowest = i
+    
+    for (let j = i +1; j < arr.length; j++) {
+        if (arr[lowest].name.localeCompare(arr[j].name) == 1) {
+            lowest = j
+        }        
+    }
+
+    if (lowest !== i) {
+        let temp = arr[i]
+        arr[i] = arr[lowest]
+        arr[lowest] = temp
+    }
+  }
+  return arr
 }
