@@ -34,7 +34,6 @@ class FileCleaner {
         let size = sizeArry[this.options.filter]
         var results = [];
         var i = 0;
-        console.log(size)
         for await (const f of this.getFiles(this.directory)) {
             let s;
             if (this.options.filter == '0') {
