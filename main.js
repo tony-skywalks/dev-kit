@@ -3,11 +3,13 @@ const path = require('path')
 const {dialog} = require('electron');
 const { resolve } = require('path');
 const fs = require('fs')
+const {FileCleaner} = require('./cleaner/cleaner')
 
 
 const isMac = process.platform === "darvin"
 const isDev = process.env.NODE_ENV !== 'production'
 let mainWindow;
+let lastDir = '';
 
 createMainWindow = () => {
   mainWindow = new BrowserWindow({
@@ -58,17 +60,29 @@ ipcMain.on('select:location',(e,options) => {
   if (options['dir'] !== '') {
     properties.defaultPath = options['dir'] 
   }
-  dialog.showOpenDialog(properties).then((res)=> {
-    if (res.canceled === false) {
-      mainWindow.webContents.send('set:searchbar',{path:res.filePaths[0]})
-      getFilesWithSize(res.filePaths[0],options.options).then((filesMap) => {
-        mainWindow.webContents.send('get:results',{res:filesMap})
-        console.log("here");
-      }).catch((e)=>{
-        console.log("Some Error Occured",e);
-      })
-    }
-  })
+  if (lastDir != '' && lastDir == options.dir && options.trigger == false) {
+    mainWindow.webContents.send('set:searchbar',{path:lastDir})
+    let fc = new FileCleaner(options.dir,options.options)
+    fc.getFilesWithSize(lastDir,options.options).then((filesMap) => {
+      mainWindow.webContents.send('get:results',{res:filesMap})
+    }).catch((e)=>{
+      console.log("Some Error Occured",e);
+    })
+  } else {
+    dialog.showOpenDialog(properties).then((res)=> {
+      if (res.canceled === false) {
+        mainWindow.webContents.send('set:searchbar',{path:res.filePaths[0]})
+        let fc = new FileCleaner(res.filePaths[0],options.options)
+        lastDir = res.filePaths[0]
+        fc.getFilesWithSize(res.filePaths[0],options.options).then((filesMap) => {
+          mainWindow.webContents.send('get:results',{res:filesMap})
+          console.log("here");
+        }).catch((e)=>{
+          console.log("Some Error Occured",e);
+        })
+      }
+    })
+  }
 })
 
 async function* getFiles(dir) {

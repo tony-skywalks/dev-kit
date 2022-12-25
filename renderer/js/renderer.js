@@ -7,17 +7,23 @@ let options = {
     type:0,
 }
 
-$('#select-sort').on('change',() => options.sort = $('#select-sort').find(":selected").val() )
-$('#select-filter').on('change',() => options.filter = $('#select-filter').find(":selected").val() )
-$('#select-type').on('change',() => options.type = $('#select-type').find(":selected").val() )
+$('#select-sort').on('change',() => {
+    options.sort = $('#select-sort').find(":selected").val()
+    triggerSearch()
+})
+
+$('#select-filter').on('change',() => {
+    options.filter = $('#select-filter').find(":selected").val()
+    triggerSearch()
+})
+
+$('#select-type').on('change',() => {
+    options.type = $('#select-type').find(":selected").val()
+    triggerSearch()
+})
 
 search.addEventListener('click',(e) => {
-    let dir = ''
-    if ($('#search-input').val() !== ''){
-        dir = $('#search-input').val()
-    }
-    ipcRenderer.send('select:location',{dir:dir,options:options})
-    appendHere.innerHTML = '<img src="../assets/img/loading.gif" class="img-fluid w-100">'
+    triggerSearch(true)
 })
 
 ipcRenderer.on('get:results',(data,e) => {
@@ -27,6 +33,27 @@ ipcRenderer.on('get:results',(data,e) => {
 ipcRenderer.on('set:searchbar',(data,e) => {
     $('#search-input').val(data.path)
 })
+
+$('#append-here').on('click','.del-btn',(e) => {
+    let file = $(e.target).attr('attr-file')
+    deleteFile(file)
+    console.log($('table tr').length)
+    if ($('table tr').length === 2) {
+        $(e.target).parents('table').remove()
+    } else {
+        $(e.target).parents('tr').remove()
+    }
+})
+
+triggerSearch = (trigger=false) => {
+    let dir = ''
+    if ($('#search-input').val() !== ''){
+        dir = $('#search-input').val()
+    }
+    ipcRenderer.send('select:location',{dir:dir,options:options,trigger:trigger})
+    appendHere.innerHTML = '<img src="../assets/img/loading.gif" class="img-fluid w-100">'
+}
+
 createTable = (data) => {
     let html = '';
     if (data.res.length > 0) {
@@ -57,17 +84,6 @@ deleteFile = (file) => {
         }
     })
 }
-
-$('#append-here').on('click','.del-btn',(e) => {
-    let file = $(e.target).attr('attr-file')
-    deleteFile(file)
-    console.log($('table tr').length)
-    if ($('table tr').length === 2) {
-        $(e.target).parents('table').remove()
-    } else {
-        $(e.target).parents('tr').remove()
-    }
-})
 
 getIco = (file) => '<i class="fa-solid fa-file fs-6 text-primary"></i> '
 
