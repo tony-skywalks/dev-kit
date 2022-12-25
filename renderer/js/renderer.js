@@ -7,6 +7,9 @@ let options = {
     type:0,
 }
 
+let searchResults = {};
+let page = 1;
+
 $('#select-sort').on('change',() => {
     options.sort = $('#select-sort').find(":selected").val()
     triggerSearch()
@@ -27,17 +30,37 @@ search.addEventListener('click',(e) => {
 })
 
 ipcRenderer.on('get:results',(data,e) => {
-    createTable(data)
+    page = 1
+    searchResults = data
+    let html = createTable(searchResults)
+    if (searchResults.res.length > 0) {
+        html += createPagination(page)
+    }
+    appendHere.innerHTML = html
+})
+
+ipcRenderer.on('on:error',(data,e) => {
+    pushNotify('error',"Oops Something Went Wrong")
+    appendHere.innerHTML = ''
 })
 
 ipcRenderer.on('set:searchbar',(data,e) => {
     $('#search-input').val(data.path)
 })
 
+$('#append-here').on('click','.pagination .page-link',(e) => {
+    appendHere.innerHTML = '<div class="w-100 text-center"><img src="../assets/img/loading.gif" class="img-fluid"></div>'
+    page = $(e.target).attr('attr-page')    
+    let html = createTable(searchResults,page)
+    if (searchResults.res.length > 0) {
+        html += createPagination(page)
+    }
+    appendHere.innerHTML = html
+})
+
 $('#append-here').on('click','.del-btn',(e) => {
     let file = $(e.target).attr('attr-file')
     deleteFile(file)
-    console.log($('table tr').length)
     if ($('table tr').length === 2) {
         $(e.target).parents('table').remove()
     } else {
@@ -51,24 +74,27 @@ triggerSearch = (trigger=false) => {
         dir = $('#search-input').val()
     }
     ipcRenderer.send('select:location',{dir:dir,options:options,trigger:trigger})
-    appendHere.innerHTML = '<img src="../assets/img/loading.gif" class="img-fluid w-100">'
+    appendHere.innerHTML = '<div class="w-100 text-center"><img src="../assets/img/loading.gif" class="img-fluid"></div>'
 }
 
-createTable = (data) => {
+createTable = (data,page=1) => {
+
+    res = paginateData(data.res,page)
+    
     let html = '';
-    if (data.res.length > 0) {
+    if (res.length > 0) {
         html +='<table class="mt-5 table"><thead class="table-dark"><tr><th>#</th><th>Filename</th><th>File Size</th><th>Actions</th></tr></thead><tbody>'
         let i = 1
-        data.res.forEach(element => {
+        res.forEach(element => {
             html += `<tr><td>${i}</td><td>${getIco(element.name)} ${element.name.replace($('#search-input').val()+'/','')}</td><td>${formatBytes(element.size)}</td><td><button attr-file="${element.name}" class="del-btn btn btn-sm btn-danger"><i class="fa fa-trash"></i></button></td></tr>`
             i++
         });
     
         html += '</tbody></table>'
     } else {
-        html += '<img src="../assets/img/empty.png" class="img-fluid w-100">'
+        html += '<div class="w-100 text-center"><img src="../assets/img/empty.png" class="img-fluid"></div>'
     }
-    appendHere.innerHTML = html
+    return html
 }
 
 deleteFile = (file) => {
@@ -87,11 +113,54 @@ deleteFile = (file) => {
 
 getIco = (file) => '<i class="fa-solid fa-file fs-6 text-primary"></i> '
 
-function formatBytes(bytes, decimals = 2) {
+formatBytes = (bytes, decimals = 2) => {
     if (!+bytes) return '0 Bytes'
     const k = 1024
     const dm = decimals < 0 ? 0 : decimals
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
-  }
+}
+
+pushNotify = (mode,message) => {
+    new Notify({
+        status: mode,
+        title: 'sky cleaner',
+        text: message,
+        effect: 'fade',
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 3000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: 'right top'
+    })
+}
+
+paginateData = (data, page) => {
+    return data.slice((page - 1) * 25, page * 25);
+}
+
+createPagination = (page) => {
+    if (searchResults.res.length > 25) {
+        let html = '<nav aria-label="..."><ul class="pagination pagination-circle">'
+        if (page == 1) {
+          html += '<li class="page-item disabled"><a class="page-link">Previous</a></li>'
+        } else {
+            html += `<li class="page-item"><a class="page-link" href="#!" attr-page="${parseInt(page) - 1}">Previous</a></li><li class="page-item"><a class="page-link" href="#!" attr-page="${parseInt(page) - 1}">${parseInt(page) - 1}</a></li>`
+        }
+        html += `<li class="page-item"><a class="page-link active" href="#!" attr-page="${page}">${page}</a></li>`
+        if (searchResults.res.length > (25 * page + 1)) {
+            html += `<li class="page-item"><a class="page-link" href="#!" attr-page="${parseInt(page) + 1}">${parseInt(page) + 1}</a></li><li class="page-item"><a class="page-link" href="#!" attr-page="${parseInt(page) + 1}">Next</a></li>`
+            html += '</ul></nav>'
+        }
+        return html
+    }
+    return ''
+} 
+

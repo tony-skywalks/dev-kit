@@ -67,6 +67,7 @@ ipcMain.on('select:location',(e,options) => {
       mainWindow.webContents.send('get:results',{res:filesMap})
     }).catch((e)=>{
       console.log("Some Error Occured",e);
+      mainWindow.webContents.send('on:error',{msg:e})
     })
   } else {
     dialog.showOpenDialog(properties).then((res)=> {
@@ -76,139 +77,11 @@ ipcMain.on('select:location',(e,options) => {
         lastDir = res.filePaths[0]
         fc.getFilesWithSize(res.filePaths[0],options.options).then((filesMap) => {
           mainWindow.webContents.send('get:results',{res:filesMap})
-          console.log("here");
         }).catch((e)=>{
           console.log("Some Error Occured",e);
+          mainWindow.webContents.send('on:error',{msg:e})
         })
       }
     })
   }
 })
-
-async function* getFiles(dir) {
-  const dirents = await fs.promises.readdir(dir, { withFileTypes: true });
-  for (const dirent of dirents) {
-    const res = resolve(dir, dirent.name);
-    if (dirent.isDirectory()) {
-      yield* getFiles(res);
-    } else {
-      yield res;
-    }
-  }
-};
-
-async function getFilesWithSize(dir,options) {
-  let sizeArry = {
-    '0':0,
-    '1':1000000,
-    '2':5000000,
-    '3':10000000,
-    '4':10000000,
-    '5':50000000,
-    '6':100000000,
-    '7':500000000,
-    '7':1000000000,
-  }
-  let size = sizeArry[options.filter]
-  var results = [];
-  var i = 0;
-  console.log(size)
-  for await (const f of getFiles(dir)) {
-    if (options.filter == '0') {
-      if (options.type == '0') {
-        s = fs.statSync(f).size
-        results[i] = {name:f,size:s}
-        i++;
-      } else {
-        if (checkFileTypeSucceds(options.type,f) == true) {
-          s = fs.statSync(f).size
-          results[i] = {name:f,size:s}
-          i++;
-        }
-      }
-    } else {
-      if (options.type == '0') {
-        s = fs.statSync(f).size
-        if (((s <= size) && (options.filter < 4)) || ((s >= size) && (options.filter >= 4)) ) {
-          results[i] = {name:f,size:s}
-          i++;
-        }
-      } else {
-        if (checkFileTypeSucceds(options.type,f) == true) { 
-          s = fs.statSync(f).size
-          if (((s <= size) && (options.filter < 4)) || ((s >= size) && (options.filter >= 4)) ) {
-            results[i] = {name:f,size:s}
-            i++;
-          }
-        }
-      }
-    }
-  }
-  if (options.sort == 1) {
-    results = sortArrayWithSize(results)
-  } else if (options.sort == 2) {
-    results = sortArrayWithSize(results).reverse()
-  } else if (options.sort == 3) {
-    results = sortArrayWithName(results)
-  } else if (options.sort == 4) {
-    results = sortArrayWithName(results).reverse()
-  }
-  return results
-}
-
-function sortArrayWithSize(arr) {
-  for (let i = 0; i < arr.length; i++) {
-    let lowest = i
-    console.log(arr[i]);
-    for (let j = i +1; j < arr.length; j++) {
-        if (arr[lowest].size > arr[j].size) {
-            lowest = j
-        }        
-    }
-
-    if (lowest !== i) {
-        let temp = arr[i]
-        arr[i] = arr[lowest]
-        arr[lowest] = temp
-    }
-  }
-  return arr
-}
-
-function checkFileTypeSucceds(ftype,file) {
-  images = ['.jpeg','.jpg','.png','.gif','.tiff','.webp','.svg','.ico'] 
-  videos = ['.mp4','.mov','.avi','.mkv','.3gp'] 
-  extension = path.extname(file)
-  if (ftype == '1') {
-    if (images.includes(extension)) {
-      return true
-    }
-  } else if (ftype == '2') {
-    if (videos.includes(extension)) {
-      return true
-    }
-  } else {
-    return true
-  }
-  return false
-}
-
-
-function sortArrayWithName(arr) {
-  for (let i = 0; i < arr.length; i++) {
-    let lowest = i
-    
-    for (let j = i +1; j < arr.length; j++) {
-        if (arr[lowest].name.localeCompare(arr[j].name) == 1) {
-            lowest = j
-        }        
-    }
-
-    if (lowest !== i) {
-        let temp = arr[i]
-        arr[i] = arr[lowest]
-        arr[lowest] = temp
-    }
-  }
-  return arr
-}
